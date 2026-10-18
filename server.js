@@ -56,7 +56,7 @@ function pageFinanceAdmin(){return layout('Komissiya və ödənişlər',"<sectio
 function notFound(){return layout('Səhifə tapılmadı','<section class="page"><div class="wrap panel narrow"><h1>Səhifə tapılmadı</h1><p class="sub">Axtardığınız bölmə mövcud deyil.</p><a class="btn" href="/">Ana səhifəyə qayıt</a></div></section>')}
 async function handle(req,res){
 const u=new URL(req.url,'http://localhost');const p=u.pathname;
-if(req.method==='GET'&&p==='/health')return json(res,200,{ok:true,app:'ustatap',version:2});
+if(req.method==='GET'&&p==='/health')return json(res,200,{ok:true,app:'ustatap',version:2.1});
 if(req.method==='GET'&&p==='/api/services')return json(res,200,{services:CATEGORIES});
 if(req.method==='GET'&&p==='/')return html(res,pageHome());
 if(req.method==='GET'&&p==='/qeydiyyat')return html(res,pageRegister());
