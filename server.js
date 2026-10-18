@@ -74,6 +74,7 @@ if(req.method==='POST'&&p==='/api/reports'){
 let d;try{d=await readBody(req)}catch{return json(res,400,{error:'Məlumatları düzgün daxil edin.'})}
 const providerId=clean(d.providerId,100),orderCode=clean(d.orderCode,20).toUpperCase(),accessKey=clean(d.accessKey,40).toUpperCase(),reason=clean(d.reason,80),details=clean(d.details,1000);
 if(!providerId||!['Saxta profil','Uyğunsuz davranış','Saxta rəy','Dələduzluq şübhəsi','Digər'].includes(reason))return json(res,400,{error:'Şikayət səbəbini seçin.'});
+const providerUsers=await read('users');if(!providerUsers.some(x=>x.id===providerId&&x.role==='provider'&&x.status==='approved'))return json(res,404,{error:'Təsdiqlənmiş usta tapılmadı.'});
 if(orderCode){const orders=await read('orders'),o=orders.find(x=>x.code===orderCode&&x.accessKey&&x.accessKey===accessKey);if(!o||!o.selectedOffer||o.selectedOffer.providerId!==providerId)return json(res,403,{error:'Bu usta ilə əlaqəli sifariş təsdiqlənmədi.'})}
 const reports=await read('reports'),reporterKey=orderCode||'anonymous';if(reports.some(x=>x.providerId===providerId&&x.orderCode===reporterKey&&x.reason===reason&&x.status==='open'))return json(res,409,{error:'Bu şikayət artıq qeydə alınıb.'});
 reports.push({id:newId(),providerId,orderCode:orderCode||null,reason,details,createdAt:new Date().toISOString(),status:'open'});await save('reports',reports);return json(res,201,{ok:true,message:'Şikayət admin yoxlaması üçün qeydə alındı.'});
