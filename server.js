@@ -174,7 +174,7 @@ if(!adminOK(req))return json(res,401,{error:'Admin icazəsi tələb olunur.'});c
 }
 const statusAction=p.match(/^\/api\/admin\/orders\/([^/]+)\/status$/);
 if(req.method==='POST'&&statusAction){
-if(!adminOK(req))return json(res,401,{error:'Admin icazəsi tələb olunur.'});let d;try{d=await readBody(req)}catch{return json(res,400,{error:'Status düzgün deyil.'})}const allowed=['Yeni sifariş','Usta axtarılır','Təklif alınıb','İş razılaşdırılıb','Tamamlandı','Ləğv edildi'],status=clean(d.status,50);if(!allowed.includes(status))return json(res,400,{error:'Status düzgün deyil.'});const code=decodeURIComponent(statusAction[1]).toUpperCase(),orders=await read('orders'),o=orders.find(x=>x.code===code);if(!o)return json(res,404,{error:'Sifariş tapılmadı.'});o.status=status;await save('orders',orders);return json(res,200,{ok:true,status});
+if(!adminOK(req))return json(res,401,{error:'Admin icazəsi tələb olunur.'});let d;try{d=await readBody(req)}catch{return json(res,400,{error:'Status düzgün deyil.'})}const allowed=['Yeni sifariş','Usta axtarılır','Təklif alınıb','İş razılaşdırılıb','İş tamamlanması gözlənilir','Tamamlandı','Ləğv edildi'],status=clean(d.status,50);if(!allowed.includes(status))return json(res,400,{error:'Status düzgün deyil.'});const code=decodeURIComponent(statusAction[1]).toUpperCase(),orders=await read('orders'),o=orders.find(x=>x.code===code);if(!o)return json(res,404,{error:'Sifariş tapılmadı.'});o.status=status;await save('orders',orders);return json(res,200,{ok:true,status});
 }
 const payAction=p.match(/^\/api\/admin\/orders\/([^/]+)\/payment$/);
 if(req.method==='POST'&&payAction){
