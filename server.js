@@ -1,4 +1,5 @@
 'use strict';
+// Deployment verification marker: keep production source aligned with tested main.
 const http = require('node:http');
 const fs = require('node:fs/promises');
 const path = require('node:path');
