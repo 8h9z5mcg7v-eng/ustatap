@@ -203,3 +203,5 @@ function publicOrder(o){return {code:o.code,category:o.category,categoryName:o.c
 async function createSession(res,user,message){const token=crypto.randomBytes(32).toString('hex'),sessions=await read('sessions');sessions.push({token,userId:user.id,expires:Date.now()+1000*60*60*24*30});await save('sessions',sessions);return json(res,201,{ok:true,token,user:publicUser(user),message})}
 const server=http.createServer((req,res)=>{handle(req,res).catch(e=>{console.error('request failed',e);if(!res.headersSent)json(res,500,{error:'Server xətası. Bir az sonra yenidən cəhd edin.'});else res.end()})});
 server.listen(PORT,'0.0.0.0',()=>console.log('UstaTap v2 listening on '+PORT));
+
+// Trigger production rebuild for order-code-only tracking update.
