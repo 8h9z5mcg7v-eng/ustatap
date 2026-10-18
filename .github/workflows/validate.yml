@@ -1,0 +1,41 @@
+name: Validate UstaTap
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  syntax-and-smoke-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Check JavaScript syntax
+        run: node --check server.js
+      - name: Check package metadata
+        run: node -e "const p=require('./package.json'); if(p.scripts.start!=='node server.js') process.exit(1)"
+      - name: Start app and smoke-test routes
+        shell: bash
+        run: |
+          PORT=8080 USTAP_ADMIN_TOKEN=ci-test-token node server.js > /tmp/ustatap.log 2>&1 &
+          APP_PID=$!
+          trap 'kill "$APP_PID" 2>/dev/null || true' EXIT
+          for i in {1..20}; do
+            if curl --fail --silent http://127.0.0.1:8080/health > /tmp/health.json; then break; fi
+            sleep 1
+          done
+          node -e "const h=require('/tmp/health.json'); if(!h.ok || h.app!=='ustatap') process.exit(1)"
+          curl --fail --silent http://127.0.0.1:8080/api/services | node -e "let s='';process.stdin.on('data',d=>s+=d).on('end',()=>{const j=JSON.parse(s);if(!Array.isArray(j.services)||j.services.length<1)process.exit(1)})"
+          curl --fail --silent http://127.0.0.1:8080/ | grep -q 'UstaTap'
+          STATUS=$(curl --silent --output /dev/null --write-out '%{http_code}' http://127.0.0.1:8080/this-route-should-not-exist)
+          test "$STATUS" = "404"
